@@ -1,4 +1,4 @@
-![EmuFlight](docs/assets/images/EmuFlight.png)
+![EmuFlight](docs/assets/images/EmuTank.png)
 
 EmuFlight is flight controller software (firmware) used to fly multi-rotor craft.
 
