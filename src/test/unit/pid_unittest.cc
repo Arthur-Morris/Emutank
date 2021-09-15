@@ -28,7 +28,7 @@ bool simulateMixerSaturated = false;
 float simulatedSetpointRate[3] = { 0,0,0 };
 float simulatedRcDeflection[3] = { 0,0,0 };
 float simulatedThrottlePIDAttenuation = 1.0f;
-float simulatedMotorMixRange = 0.0f;
+float simulatedControllerMixRange = 0.0f;
 
 int16_t debug[DEBUG16_VALUE_COUNT];
 uint8_t debugMode;
@@ -65,7 +65,7 @@ extern "C" {
     attitudeEulerAngles_t attitude;
 
     float getThrottlePIDAttenuation(void) { return simulatedThrottlePIDAttenuation; }
-    float getMotorMixRange(void) { return simulatedMotorMixRange; }
+    float getControllerMixRange(void) { return simulatedControllerMixRange; }
     float getSetpointRate(int axis) { return simulatedSetpointRate[axis]; }
     bool mixerIsOutputSaturated(int, float) { return simulateMixerSaturated; }
     float getRcDeflectionAbs(int axis) { return ABS(simulatedRcDeflection[axis]); }
@@ -84,29 +84,23 @@ int loopIter = 0;
 void setDefaultTestSettings(void) {
     pgResetAll();
     pidProfile = pidProfilesMutable(1);
-    pidProfile->pid[PID_ROLL]  =  { 40, 40, 30, 65 };
-    pidProfile->pid[PID_PITCH] =  { 58, 50, 35, 60 };
-    pidProfile->pid[PID_YAW]   =  { 70, 45, 20, 60 };
-    pidProfile->pid[PID_LEVEL] =  { 50, 50, 75, 0 };
+    pidProfile->pid[PID_ROLL]  =  { 40, 40, 30, 0 };
+    pidProfile->pid[PID_PITCH] =  { 58, 50, 35, 0 };
+    pidProfile->pid[PID_YAW]   =  { 70, 45, 20, 0 };
+    pidProfile->pid[PID_LEVEL_LOW] =  { 70, 0, 10, 40 };
+    pidProfile->pid[PID_LEVEL_HIGH] =  { 35, 0, 1, 0 };
+
 
     pidProfile->pidSumLimit = PIDSUM_LIMIT;
     pidProfile->pidSumLimitYaw = PIDSUM_LIMIT_YAW;
-    pidProfile->yaw_lowpass_hz = 0;
-    pidProfile->dterm_lowpass_hz = 100;
-    pidProfile->dterm_lowpass2_hz = 0;
-    pidProfile->dterm_notch_hz = 260;
-    pidProfile->dterm_notch_cutoff = 160;
+    pidProfile->dFilter[ROLL].dLpf = 100;
+    pidProfile->dFilter[ROLL].dLpf2 = 0;
     pidProfile->dterm_filter_type = FILTER_BIQUAD;
     pidProfile->itermWindupPointPercent = 50;
-    pidProfile->vbatPidCompensation = 0;
     pidProfile->pidAtMinThrottle = PID_STABILISATION_ON;
     pidProfile->levelAngleLimit = 55;
-    pidProfile->feedForwardTransition = 100;
     pidProfile->yawRateAccelLimit = 100;
     pidProfile->rateAccelLimit = 0;
-    pidProfile->antiGravityMode = ANTI_GRAVITY_SMOOTH;
-    pidProfile->itermThrottleThreshold = 250;
-    pidProfile->itermAcceleratorGain = 1000;
     pidProfile->crash_time = 500;
     pidProfile->crash_delay = 0;
     pidProfile->crash_recovery_angle = 10;
@@ -116,7 +110,7 @@ void setDefaultTestSettings(void) {
     pidProfile->crash_setpoint_threshold = 350;
     pidProfile->crash_recovery = PID_CRASH_RECOVERY_OFF;
     pidProfile->horizon_tilt_effect = 75;
-    pidProfile->horizon_tilt_expert_mode = false;
+    //pidProfile->horizon_tilt_expert_mode = false;
     pidProfile->crash_limit_yaw = 200;
     pidProfile->itermLimit = 150;
     pidProfile->throttle_boost = 0;
@@ -134,7 +128,7 @@ void resetTest(void) {
     loopIter = 0;
     simulateMixerSaturated = false;
     simulatedThrottlePIDAttenuation = 1.0f;
-    simulatedMotorMixRange = 0.0f;
+    simulatedControllerMixRange = 0.0f;
 
     pidStabilisationState(PID_STABILISATION_OFF);
     DISABLE_ARMING_FLAG(ARMED);
@@ -269,12 +263,12 @@ TEST(pidControllerTest, testPidLoop) {
     EXPECT_FLOAT_EQ(-132.25, pidData[FD_YAW].D);
 
     // Simulate Iterm behaviour during mixer saturation
-    simulatedMotorMixRange = 1.2f;
+    simulatedControllerMixRange = 1.2f;
     pidController(pidProfile, &rollAndPitchTrims, currentTestTime());
     ASSERT_NEAR(-23.5, pidData[FD_ROLL].I, calculateTolerance(-23.5));
     ASSERT_NEAR(19.6, pidData[FD_PITCH].I, calculateTolerance(19.6));
     ASSERT_NEAR(-8.8, pidData[FD_YAW].I, calculateTolerance(-8.8));
-    simulatedMotorMixRange = 0;
+    simulatedControllerMixRange = 0;
 
     // Match the stick to gyro to stop error
     simulatedSetpointRate[FD_ROLL] = 100;
@@ -455,7 +449,7 @@ TEST(pidControllerTest, testCrashRecoveryMode) {
 
     // generate crash detection for roll axis
     gyro.gyroADCf[FD_ROLL]  = 800;
-    simulatedMotorMixRange = 1.2f;
+    simulatedControllerMixRange = 1.2f;
     for (int loop =0; loop <= loopsToCrashTime; loop++) {
         gyro.gyroADCf[FD_ROLL] += gyro.gyroADCf[FD_ROLL];
         pidController(pidProfile, &rollAndPitchTrims, currentTestTime());

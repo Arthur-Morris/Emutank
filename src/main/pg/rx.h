@@ -43,6 +43,7 @@ typedef struct rxConfig_s {
     uint8_t rcInterpolationChannels;
     uint8_t rcInterpolationInterval;
     uint8_t fpvCamAngleDegrees;             // Camera angle to be scaled into rc commands
+    uint8_t cinematicYaw;                   // Dynamically change yaw so that it always yaws around the gravity vector
     uint8_t airModeActivateThreshold;       // Throttle setpoint percent where airmode gets activated
 
     uint16_t rx_min_usec;
@@ -52,10 +53,11 @@ typedef struct rxConfig_s {
     int8_t rssi_offset;                     // offset applied to the RSSI value before it is returned
     uint8_t rc_smoothing_type;              // Determines the smoothing algorithm to use: INTERPOLATION or FILTER
     uint8_t rc_smoothing_input_cutoff;      // Filter cutoff frequency for the input filter (0 = auto)
-    uint8_t rc_smoothing_derivative_cutoff; // Filter cutoff frequency for the setpoint weight derivative filter (0 = auto)
     uint8_t rc_smoothing_debug_axis;        // Axis to log as debug values when debug_mode = RC_SMOOTHING
     uint8_t rc_smoothing_input_type;        // Input filter type (0 = PT1, 1 = BIQUAD)
-    uint8_t rc_smoothing_derivative_type;   // Derivative filter type (0 = OFF, 1 = PT1, 2 = BIQUAD)
+
+    uint8_t showAlteredRc;               // allow you to see rate dynamics in the configurator
+    uint8_t sbus_baud_fast; // Select SBus fast baud rate
 } rxConfig_t;
 
 PG_DECLARE(rxConfig_t, rxConfig);

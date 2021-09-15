@@ -50,6 +50,7 @@ const char * const debugModeNames[DEBUG_COUNT] = {
     "FFT_TIME",
     "FFT_FREQ",
     "RX_FRSKY_SPI",
+    "RX_SFHSS_SPI",
     "GYRO_RAW",
     "DUAL_GYRO",
     "DUAL_GYRO_RAW",
@@ -70,11 +71,11 @@ const char * const debugModeNames[DEBUG_COUNT] = {
     "SMARTAUDIO",
     "RTH",
     "ITERM_RELAX",
-    "ACRO_TRAINER",
     "RC_SMOOTHING",
     "RX_SIGNAL_LOSS",
     "RC_SMOOTHING_RATE",
-    "ANTI_GRAVITY",
     "IMU",
     "KALMAN",
+    "ANGLE",
+    "HORIZON"
 };

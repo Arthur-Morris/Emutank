@@ -71,6 +71,7 @@
 #if !defined(USE_TELEMETRY)
 #undef USE_CRSF_CMS_TELEMETRY
 #undef USE_TELEMETRY_CRSF
+#undef USE_TELEMETRY_GHST
 #undef USE_TELEMETRY_FRSKY_HUB
 #undef USE_TELEMETRY_HOTT
 #undef USE_TELEMETRY_IBUS
@@ -81,6 +82,10 @@
 #undef USE_TELEMETRY_SMARTPORT
 #undef USE_TELEMETRY_SRXL
 #undef USE_SERIALRX_FPORT
+#endif
+
+#if !defined(USE_SERIALRX_GHST)
+#undef USE_TELEMETRY_GHST
 #endif
 
 #if !defined(USE_SERIALRX_CRSF)
@@ -124,9 +129,15 @@
 #undef USE_VTX_SMARTAUDIO
 #endif
 
-#if defined(USE_RX_FRSKY_SPI_D) || defined(USE_RX_FRSKY_SPI_X)
+#if defined(USE_RX_FRSKY_SPI_D) || defined(USE_RX_FRSKY_SPI_X) || defined(USE_RX_REDPINE_SPI)
 #define USE_RX_CC2500
+#define USE_RX_CC2500_BIND
 #define USE_RX_FRSKY_SPI
+#endif
+
+#if defined(USE_RX_SFHSS_SPI)
+#define USE_RX_CC2500
+#define USE_RX_CC2500_BIND
 #endif
 
 // Burst dshot to default off if not configured explicitly by target

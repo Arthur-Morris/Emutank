@@ -128,6 +128,7 @@
 #define USE_PWM
 #define USE_SERIAL_RX
 #define USE_SERIALRX_CRSF       // Team Black Sheep Crossfire protocol
+#define USE_SERIALRX_GHST       // ImmersionRC Ghost Protocol
 #define USE_SERIALRX_IBUS       // FlySky and Turnigy receivers
 #define USE_SERIALRX_SBUS       // Frsky and Futaba receivers
 #define USE_SERIALRX_SPEKTRUM   // SRXL, DSM2 and DSMX protocol
@@ -143,7 +144,6 @@
 #endif
 
 #if (FLASH_SIZE > 64)
-#define USE_ACRO_TRAINER
 #define USE_BLACKBOX
 #define USE_RESOURCE_MGMT
 #define USE_RUNAWAY_TAKEOFF     // Runaway Takeoff Prevention (anti-taz) - Marked for removal
@@ -155,6 +155,8 @@
 #endif
 
 #if (FLASH_SIZE > 128)
+#define USE_PEGASUS_UI
+#define USE_SMITH_PREDICTOR
 #define USE_SERIALRX_SUMH       // Graupner legacy protocol
 #define USE_CAMERA_CONTROL
 #define USE_CMS
@@ -175,6 +177,7 @@
 #define USE_RX_MSP
 #define USE_SERIALRX_FPORT      // FrSky FPort
 #define USE_TELEMETRY_CRSF
+#define USE_TELEMETRY_GHST
 #define USE_TELEMETRY_SRXL
 #define USE_VIRTUAL_CURRENT_METER
 #define USE_VTX_COMMON
@@ -190,8 +193,6 @@
 #define USE_THROTTLE_BOOST
 #define USE_RC_SMOOTHING_FILTER
 #define USE_ITERM_RELAX
-#define USE_INTEGRATED_YAW_CONTROL
-
 #ifdef USE_SERIALRX_SPEKTRUM
 #define USE_SPEKTRUM_BIND
 #define USE_SPEKTRUM_BIND_PLUG
@@ -224,7 +225,6 @@
 #define USE_TELEMETRY_MAVLINK
 #define USE_UNCOMMON_MIXERS
 #define USE_SIGNATURE
-#define USE_ABSOLUTE_CONTROL
 #define USE_CMS_FAILSAFE_MENU
 #define USE_CMS_GPS_RESCUE_MENU
 #endif

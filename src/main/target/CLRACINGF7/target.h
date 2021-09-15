@@ -1,23 +1,22 @@
-
 /*
-* This file is part of Cleanflight and Betaflight.
-*
-* Cleanflight and Betaflight are free software. You can redistribute
-* this software and/or modify this software under the terms of the
-* GNU General Public License as published by the Free Software
-* Foundation, either version 3 of the License, or (at your option)
-* any later version.
-*
-* Cleanflight and Betaflight are distributed in the hope that they
-* will be useful, but WITHOUT ANY WARRANTY; without even the implied
-* warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-* See the GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this software.
-*
-* If not, see <http://www.gnu.org/licenses/>.
-*/
+ * This file is part of Cleanflight and Betaflight.
+ *
+ * Cleanflight and Betaflight are free software. You can redistribute
+ * this software and/or modify this software under the terms of the
+ * GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * Cleanflight and Betaflight are distributed in the hope that they
+ * will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this software.
+ *
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #pragma once
 #define TARGET_BOARD_IDENTIFIER "CLR7"
@@ -25,13 +24,19 @@
 
 #define ENABLE_DSHOT_DMAR       true
 
-#define LED0_PIN                PB0
+#define USE_LEDSTRIP
+#define LED0_PIN                PB3
+
 #define USE_BEEPER
 #define BEEPER_PIN                  PB4
 #define BEEPER_INVERTED
 
 //define camera control
-#define CAMERA_CONTROL_PIN PB3
+//#define CAMERA_CONTROL_PIN PB3
+
+#define USE_PINIO
+#define PINIO1_PIN                                       PA14                   // VTX power switcher
+#define USE_PINIOBOX
 
 #define USE_EXTI
 #define MPU_INT_EXTI            PC4
@@ -148,5 +153,5 @@
 #define TARGET_IO_PORTC         0xffff
 #define TARGET_IO_PORTD         (BIT(2))
 
-#define USABLE_TIMER_CHANNEL_COUNT      6
-#define USED_TIMERS             ( TIM_N(2) | TIM_N(3) | TIM_N(4)  )
+#define USABLE_TIMER_CHANNEL_COUNT                      9                       //updated timer count to compensate for Nf Motor 4
+#define USED_TIMERS ( TIM_N(2) | TIM_N(3) | TIM_N(4) | TIM_N(5)  | TIM_N(8)   )

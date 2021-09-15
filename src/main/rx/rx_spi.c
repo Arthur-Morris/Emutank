@@ -40,6 +40,7 @@
 
 #include "rx/rx_spi.h"
 #include "rx/cc2500_frsky_common.h"
+#include "rx/cc2500_redpine.h"
 #include "rx/nrf24_cx10.h"
 #include "rx/nrf24_syma.h"
 #include "rx/nrf24_v202.h"
@@ -47,6 +48,7 @@
 #include "rx/nrf24_inav.h"
 #include "rx/nrf24_kn.h"
 #include "rx/flysky.h"
+#include "rx/cc2500_sfhss.h"
 
 
 uint16_t rxSpiRcData[MAX_SUPPORTED_RC_CHANNEL_COUNT];
@@ -61,10 +63,8 @@ static protocolInitFnPtr protocolInit;
 static protocolDataReceivedFnPtr protocolDataReceived;
 static protocolSetRcDataFromPayloadFnPtr protocolSetRcDataFromPayload;
 
-STATIC_UNIT_TESTED uint16_t rxSpiReadRawRC(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t channel)
-{
-    BUILD_BUG_ON(NRF24L01_MAX_PAYLOAD_SIZE > RX_SPI_MAX_PAYLOAD_SIZE);
-
+STATIC_UNIT_TESTED uint16_t rxSpiReadRawRC(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t channel) {
+    STATIC_ASSERT(NRF24L01_MAX_PAYLOAD_SIZE <= RX_SPI_MAX_PAYLOAD_SIZE, NRF24L01_MAX_PAYLOAD_SIZE_larger_than_RX_SPI_MAX_PAYLOAD_SIZE);
     if (channel >= rxRuntimeConfig->channelCount) {
         return 0;
     }
@@ -75,10 +75,8 @@ STATIC_UNIT_TESTED uint16_t rxSpiReadRawRC(const rxRuntimeConfig_t *rxRuntimeCon
     return rxSpiRcData[channel];
 }
 
-STATIC_UNIT_TESTED bool rxSpiSetProtocol(rx_spi_protocol_e protocol)
-{
+STATIC_UNIT_TESTED bool rxSpiSetProtocol(rx_spi_protocol_e protocol) {
     switch (protocol) {
-    default:
 #ifdef USE_RX_V202
     case RX_SPI_NRF24_V202_250K:
     case RX_SPI_NRF24_V202_1M:
@@ -134,7 +132,6 @@ STATIC_UNIT_TESTED bool rxSpiSetProtocol(rx_spi_protocol_e protocol)
         protocolInit = frSkySpiInit;
         protocolDataReceived = frSkySpiDataReceived;
         protocolSetRcDataFromPayload = frSkySpiSetRcData;
-
         break;
 #endif // USE_RX_FRSKY_SPI
 #ifdef USE_RX_FLYSKY
@@ -145,6 +142,22 @@ STATIC_UNIT_TESTED bool rxSpiSetProtocol(rx_spi_protocol_e protocol)
         protocolSetRcDataFromPayload = flySkySetRcDataFromPayload;
         break;
 #endif
+#ifdef USE_RX_SFHSS_SPI
+    case RX_SPI_SFHSS:
+        protocolInit = sfhssSpiInit;
+        protocolDataReceived = sfhssSpiDataReceived;
+        protocolSetRcDataFromPayload = sfhssSpiSetRcData;
+        break;
+#endif
+#if defined(USE_RX_REDPINE_SPI)
+    case RX_SPI_REDPINE:
+        protocolInit = redpineSpiInit;
+        protocolDataReceived = redpineSpiDataReceived;
+        protocolSetRcDataFromPayload = redpineSetRcData;
+        break;
+#endif
+    default:
+        return false;
     }
     return true;
 }
@@ -154,10 +167,8 @@ STATIC_UNIT_TESTED bool rxSpiSetProtocol(rx_spi_protocol_e protocol)
  * Called from updateRx in rx.c, updateRx called from taskUpdateRxCheck.
  * If taskUpdateRxCheck returns true, then taskUpdateRxMain will shortly be called.
  */
-static uint8_t rxSpiFrameStatus(rxRuntimeConfig_t *rxRuntimeConfig)
-{
+static uint8_t rxSpiFrameStatus(rxRuntimeConfig_t *rxRuntimeConfig) {
     UNUSED(rxRuntimeConfig);
-
     if (protocolDataReceived(rxSpiPayload) == RX_SPI_RECEIVED_DATA) {
         rxSpiNewPacketAvailable = true;
         return RX_FRAME_COMPLETE;
@@ -168,23 +179,18 @@ static uint8_t rxSpiFrameStatus(rxRuntimeConfig_t *rxRuntimeConfig)
 /*
  * Set and initialize the RX protocol
  */
-bool rxSpiInit(const rxSpiConfig_t *rxSpiConfig, rxRuntimeConfig_t *rxRuntimeConfig)
-{
+bool rxSpiInit(const rxSpiConfig_t *rxSpiConfig, rxRuntimeConfig_t *rxRuntimeConfig) {
     bool ret = false;
-
     if (!rxSpiDeviceInit(rxSpiConfig)) {
         return false;
     }
-
     if (rxSpiSetProtocol(rxSpiConfig->rx_spi_protocol)) {
         ret = protocolInit(rxSpiConfig, rxRuntimeConfig);
     }
     rxSpiNewPacketAvailable = false;
     rxRuntimeConfig->rxRefreshRate = 20000;
-
     rxRuntimeConfig->rcReadRawFn = rxSpiReadRawRC;
     rxRuntimeConfig->rcFrameStatusFn = rxSpiFrameStatus;
-
     return ret;
 }
 #endif
